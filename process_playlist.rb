@@ -36,9 +36,30 @@ end
 
 class MixTape
 
-  User = Struct.new(:id, :name)
-  Song = Struct.new(:id, :artist, :title)
-  PlayList = Struct.new(:id, :user, :songs)
+  User = Struct.new(:id, :name) do
+    def to_hash
+      { "id" => id, "name" => name }
+    end
+  end
+
+  Song = Struct.new(:id, :artist, :title) do
+    def to_hash
+      { "id" => id, "artist" => artist, "title" => title }
+    end
+  end
+
+  PlayList = Struct.new(:id, :user, :songs) do
+    def to_hash
+      song_ids = (songs || []).map { |song| song.id }
+      hsh = { "id" => id}
+      if user && user.id
+        hsh["user_id"] = user.id
+      end
+      hsh["song_ids"] = song_ids
+
+      hsh
+    end
+  end
 
   def initialize(data_file)
     # check if file is valid ??
@@ -54,9 +75,10 @@ class MixTape
   # Remove a playlist.
   # Add an existing song to an existing playlist.
 
-  def process_changes(changes_file)
-    puts "process_changes for #{changes_file}"
-    changes_file = File.read("changes.json")
+  def process_changes(file_name)
+    puts
+    puts "processing changes for #{file_name}"
+    changes_file = File.read(file_name)
     changes_json = JSON.parse(changes_file)
 
     playlists = changes_json["playlists"]
@@ -98,20 +120,27 @@ class MixTape
       end
     end
 
+    puts
     puts "summary of changes applied :"
     puts "# of playlists created : #{num_playlists_created}"
-    puts "# of playlists not created : #{num_playlists_not_created}"
     puts "# of playlists updated : #{num_playlists_updated}"
-    puts "# of playlists not updated : #{num_playlists_not_updated}"
     puts "# of playlists deleted : #{num_playlists_deleted}"
-    puts "# of playlists not deleted : #{num_playlists_not_deleted}"
+
+    puts "# of playlists NOT created : #{num_playlists_not_created}" if num_playlists_not_created > 0
+    puts "# of playlists NOT updated : #{num_playlists_not_updated}" if num_playlists_not_updated > 0
+    puts "# of playlists NOT deleted : #{num_playlists_not_deleted}" if num_playlists_not_deleted > 0
   end
 
   def print_updated_state
-    puts "print_updated_state"
-    puts "USERS: #{@users.inspect}"
-    puts "SONGS: #{@songs.inspect}"
-    puts "PlayLists: #{@playlists.inspect}"
+    output = {
+      "users" => @users.values.map { |u| { "id" => u.id, "name" => u.name  } } ,
+      "playlists" => @playlists.values.map { |p| p.to_hash },
+      "songs" => @songs.values.map {|s| s.to_hash },
+    }
+
+    File.open("output.json","w") do |f|
+      f.write(JSON.pretty_generate(output))
+    end
   end
 
   def injest_mixtape_data
@@ -201,7 +230,6 @@ class MixTape
   end
 
   def update_playlist(hsh)
-    puts "update hash #{hsh}"
     play_list_id = hsh["id"]
     play_list = find_play_list_by_id(play_list_id)
     unless play_list
@@ -234,13 +262,15 @@ class MixTape
       return false
     end
 
-    songs = find_songs_by_ids(hsh["song_ids"])
+    songs = find_songs_by_ids(hsh["song_ids"]).compact
     if songs.empty?
       puts "need at least 1 valid song to create a new playlist : #{hsh["song_ids"]}"
       return false
     end
 
-    return PlayList.new(play_list_id, user, songs)
+    play_list = PlayList.new(play_list_id, user, songs)
+    @playlists[play_list_id] = play_list
+    play_list
   end
 
   def find_play_list_by_id(id)
@@ -253,7 +283,7 @@ class MixTape
 
   def find_songs_by_ids(ids)
     ids ||= []
-    @songs.values_at(ids)
+    @songs.values_at(*ids)
   end
 
   def find_song_by_id(id)
