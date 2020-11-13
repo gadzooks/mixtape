@@ -233,7 +233,7 @@ class MixTape
     play_list_id = hsh["id"]
     play_list = find_play_list_by_id(play_list_id)
     unless play_list
-      puts "could not find playlist with id #{play_list_id} to update "
+      puts "could not find playlist with id #{play_list_id} for updating"
       return false
     end
 
