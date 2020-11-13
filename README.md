@@ -1,8 +1,10 @@
 # Batch process playlists
 
-## Usage : ./process_playlist.rb changes.json
+## Usage : 
+./process_playlist.rb
+./process_playlist.rb data/changes.json
 
-## Assumptions : 
+## Assumptions :
 1. Since we are doing batch processing, we dont want to error out if we get bad
    data, ex creating a new playlist without any songs or with an invalid user
 2. Assuming that the json schema for all the input files is valid. In

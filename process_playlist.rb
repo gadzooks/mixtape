@@ -3,8 +3,8 @@
 require 'json'
 require_relative 'lib/mix_tape'
 
-# to run : ./process_playlist.rb <changes.json>
-#
+# to run : ./process_playlist.rb data/changes.json
+# for usage : ./process_playlist.rb
 # Tested on Macbook with ruby 2.5.3
 
 # NOTE : Assumptions :
