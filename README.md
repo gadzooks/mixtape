@@ -1,5 +1,14 @@
 # Batch process playlists
 
+## Testing : 
+
+- Tested on Macbook running ruby 2.5.3.
+- Would use Rspec for production code.
+
+Test cases : 
+1. apply empty json file for updates and verify that output.json matches mixtape-data.json
+2. apply actual changes via data/changes.json and verify via diff.
+
 ## Usage : 
 ./process_playlist.rb
 
