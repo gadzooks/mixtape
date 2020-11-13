@@ -10,19 +10,21 @@ require 'json'
 
 # Don't worry about creating a UI, DB, server, or deployment.
 
+DATA_DIR = 'data'
+
 module Main
 
   def self.run
     if ARGV.length < 1
       puts "Usage: process_playlist.rb changes.json"
       puts "changes.json format : "
-      sample_changes_file = File.read("changes.json")
+      sample_changes_file = File.read("#{DATA_DIR}/changes.json")
       sample_json = JSON.parse(sample_changes_file)
       puts JSON.pretty_generate sample_json
       exit -1
     end
 
-    mix_tape = MixTape.new("mixtape-data.json")
+    mix_tape = MixTape.new("#{DATA_DIR}/mixtape-data.json")
 
     mix_tape.injest_mixtape_data
 
@@ -138,7 +140,9 @@ class MixTape
       "songs" => @songs.values.map {|s| s.to_hash },
     }
 
-    File.open("output.json","w") do |f|
+    updated_file = "#{DATA_DIR}/output.json"
+    puts "\nsaving results to #{updated_file}"
+    File.open(updated_file, "w") do |f|
       f.write(JSON.pretty_generate(output))
     end
   end
