@@ -2,6 +2,7 @@
 
 ## Usage : 
 ./process_playlist.rb
+
 ./process_playlist.rb data/changes.json
 
 ## Assumptions :
