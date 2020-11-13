@@ -1,9 +1,11 @@
+require 'json'
 require_relative 'model'
 module InjestMixtape
 
   include Model
   def injest_mixtape_data
 
+    # TODO check if file is valid ??
     puts "processing #{@data_file}"
     mix_tape_file = File.read(@data_file)
     mix_tape_json = JSON.parse(mix_tape_file)
@@ -77,6 +79,5 @@ module InjestMixtape
 
     playlists
   end
-
 
 end
